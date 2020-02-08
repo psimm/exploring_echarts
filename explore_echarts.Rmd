@@ -39,7 +39,7 @@ In addition, there are many packages specializing in a type of graph, such as [d
 
 In addition to these advantages, it also offers features not seen in other packages (or at least not in this specific form): [Geospatial 3D maps](https://echarts4r.john-coene.com/articles/globe.html) and [timelines](https://echarts4r.john-coene.com/articles/timeline.html)
 
-In terms of ease of use, I'd put echarts4r in the middle of the pack. The R documentation is easy to follow and has good examples, but it cannot cover every detail, so one has to consult the official echarts documentation frequently. However, in contrast with learning D3 from scratch, this doesn't take much time, an advantage that GitLab also noted in their [comparison](https://about.gitlab.com/blog/2019/09/30/why-we-chose-echarts/). As a long time ggplot2 user, I do miss the in-depth aesthetic mappings of ggplot2, faceting and ease of use when customizing axes. Combining different plots seems to require quite q bit of code duplication, although I can definitely see how someone without experience in ggplot2 prefers the more straightforward style of echarts4r. One last thing to keep in mind is that as a recent package and a larger userbase in China than in the West, StackOverflow doesn't yet have many questions and answers on echarts.
+In terms of ease of use, I'd put echarts4r in the middle of the pack. The R documentation is easy to follow and has good examples, but it cannot cover every detail, so one has to consult the official echarts documentation frequently. However, in contrast with learning D3 from scratch, this doesn't take much time, an advantage that GitLab also noted in their [comparison](https://about.gitlab.com/blog/2019/09/30/why-we-chose-echarts/). As a long time ggplot2 user, I do miss the in-depth aesthetic mappings of ggplot2, faceting and ease of use when customizing axes. One last thing to keep in mind is that as a recent package and a larger userbase in China than in the West, StackOverflow doesn't yet have many questions and answers on echarts.
 
 ## Let's get started
 
@@ -98,7 +98,7 @@ top_destinations %>%
 
 ### Stacked bar chart
 
-Echarts doesn't have aesthetic mapping the way ggplot2 does. This means that sometimes code needs to be repeated. It may be possible to write a convenient wrapper function.
+echarts uses grouping with dplyr::group_by() instead of an aes() function like ggplot2 and highcharter.
 
 ```{r stackedbar}
 flights_daytime <- flights %>% 
@@ -109,13 +109,11 @@ flights_daytime <- flights %>%
     TRUE ~ "Evening"
   )) %>% 
   count(origin, daytime) %>% 
-  pivot_wider(names_from = daytime, values_from = n)
+  group_by(daytime)
 
 flights_daytime %>% 
   e_charts(origin, stack = "grp") %>% 
-  e_bar(Morning, stack = "grp", barWidth = "50%") %>% 
-  e_bar(Afternoon, stack = "grp") %>% 
-  e_bar(Evening, stack = "grp") %>% 
+  e_bar(n) %>% 
   e_tooltip(
     trigger = "axis",
     axisPointer = list(
